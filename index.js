@@ -31,9 +31,8 @@ if (!cluster.isMaster) {
     }, 1000)
 } else {
     cluster.fork();
-    const electron = require('electron');
-    const app = electron.app;
-    const BrowserWindow = electron.BrowserWindow;
+
+    const {app, BrowserWindow, ipcMain} = require('electron')
     const {exec, execSync} = require('child_process');
 
     let mainWindow = null;
@@ -46,6 +45,8 @@ if (!cluster.isMaster) {
     });
 
     app.on('ready', function () {
+
+        ipcMain.on('ipc', (event, arg)=> console.log(arg));
 
         // ブラウザ(Chromium)の起動, 初期画面のロード
         mainWindow = new BrowserWindow({width: 800, height: 600});

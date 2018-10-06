@@ -9,12 +9,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="stylesheet" href="style.css">
     <script>
-    </script>
-    <script>
         "use strict";
         window.onload = function () {
             load();
-            console.log(process.pid);
         };
 
         function load() {
@@ -27,15 +24,24 @@
             // create_new_webview_instanse
             var newWebview = document.createElement("webview");
             newWebview.setAttribute("src", url);
-            newWebview.setAttribute("preload", "./pid.js");
+            newWebview.setAttribute("preload", "pid.js");
             webview_wrapper.appendChild(newWebview);
+            setTimeout(() => {
+                let webview = document.getElementsByTagName('webview')
+                if (webview.length == 0) {
+                    //arguments.callee()は自身を呼び出す
+                    setTimeout(arguments.callee(), 100);
+                    return
+                }
+                webview[0].openDevTools();
+            }, 100);
         }
     </script>
 </head>
 
 <body ng-app="app" ng-controller="RootCtrl as root">
 <div id="menu-bar">
-    <input type="text" id="url" value="https://google.com/" onChange="load(this)"></input>
+    <input type="text" id="url" value="http://google.com" onChange="load(this)"></input>
     <button onclick="load();">reload</button>
 </div>
 <div id="webview_wrapper">
