@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>MWS</title>
+    <meta name="description" content="">
+    <meta name="keywords" content=""/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        "use strict";
+        window.onload=load;
+        function load() {
+            var webview_wrapper = document.getElementById("webview_wrapper");
+            webview_wrapper.removeChild(webview_wrapper.lastChild);
+
+            // get url
+            var url = document.getElementById("url").value;
+
+            // create_new_webview_instanse
+            var newWebview = document.createElement("webview");
+            newWebview.setAttribute("src", url);
+            webview_wrapper.appendChild(newWebview);
+        }
+    </script>
+</head>
+
+<body ng-app="app" ng-controller="RootCtrl as root">
+<div id="menu-bar">
+    <input type="text" id="url" value="https://google.com/" onChange="load(this)"></input>
+    <button onclick="load();">reload</button>
+</div>
+<div id="webview_wrapper">
+</div>
+</body>
+</html>
