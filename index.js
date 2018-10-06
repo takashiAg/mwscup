@@ -1,22 +1,60 @@
-const electron = require('electron');
-const app = electron.app;
-const BrowserWindow = electron.BrowserWindow;
+const cluster = require('cluster');
 
-let mainWindow = null;
+let process_list = [];
+if (!cluster.isMaster) {
+    console.log('not master')
+    const {exec, execSync} = require('child_process');
+    setInterval(() => {
+        process_list = []
+        let stdout = execSync('ps uax').toString();
+        stdout.split('\n').forEach(value => {
+            let result = value.match(/.*Electron|electron.*/g);
+            if (result == null)
+                return;
+            let result_array = value.split(/\s+/g);
+            let ps_list = {
+                "user": result_array[0],
+                "pid": result_array[1],
+                "cpu": result_array[2],
+                "mem": result_array[3],
+                "vsz": result_array[4],
+                "rss": result_array[5],
+                "tt": result_array[6],
+                "stat": result_array[7],
+                "started": result_array[8],
+                "time": result_array[9],
+                "command": result_array[10]
+            }
+            process_list.push(ps_list);
+        });
+        console.log(process_list);
+    }, 1000)
+} else {
+    cluster.fork();
+    const electron = require('electron');
+    const app = electron.app;
+    const BrowserWindow = electron.BrowserWindow;
+    const {exec, execSync} = require('child_process');
 
-app.on('window-all-closed', function() {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
+    let mainWindow = null;
+    console.log(process.pid);
 
-app.on('ready', function() {
+    app.on('window-all-closed', function () {
+        if (process.platform !== 'darwin') {
+            app.quit();
+        }
+    });
 
-  // ブラウザ(Chromium)の起動, 初期画面のロード
-  mainWindow = new BrowserWindow({width: 800, height: 600});
-  mainWindow.loadURL('file://' + __dirname + '/index.html');
+    app.on('ready', function () {
 
-  mainWindow.on('closed', function() {
-    mainWindow = null;
-  });
-});
+        // ブラウザ(Chromium)の起動, 初期画面のロード
+        mainWindow = new BrowserWindow({width: 800, height: 600});
+        mainWindow.loadURL('file://' + __dirname + '/index.html');
+
+        mainWindow.on('closed', function () {
+            mainWindow = null;
+        });
+    });
+
+}
+
