@@ -9,8 +9,29 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="stylesheet" href="style.css">
     <script>
+        const exec = require('child_process').exec;
+        const nodeConsole = require('console');
+        const bashconsole = new nodeConsole.Console(process.stdout, process.stderr);
+    </script>
+    <script>
         "use strict";
-        window.onload=load;
+        window.onload = function () {
+            load();
+            exec('ps uax', (err, stdout, stderr) => {
+                if (err)
+                    bashconsole.error(err);
+                let grep_result = [];
+                stdout.split(',').forEach(value => {
+                    let result = value.match(/.*Electron.*/);
+                    if (result == null)
+                        return;
+                    grep_result.push(result);
+                });
+                bashconsole.log(stdout);
+                bashconsole.log(grep_result);
+            });
+        };
+
         function load() {
             var webview_wrapper = document.getElementById("webview_wrapper");
             webview_wrapper.removeChild(webview_wrapper.lastChild);
