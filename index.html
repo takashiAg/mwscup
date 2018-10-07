@@ -9,10 +9,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="stylesheet" href="style.css">
     <script>
+        window.jQuery = window.$ = require('jquery');
+    </script>
+    <script>
+        let oldsrc;
         "use strict";
         window.onload = function () {
             load();
-        };
+            setInterval(() => {
+                let newsrc = document.querySelector("#webview_wrapper webview").getAttribute('src')
+                if (newsrc != oldsrc) {
+                    document.querySelector("div#menu-bar input#url").value = newsrc;
+                    oldsrc = newsrc;
+                }
+            }, 100);
+        }
 
         function load() {
             var webview_wrapper = document.getElementById("webview_wrapper");
@@ -37,6 +48,7 @@
             }, 100);
         }
     </script>
+    <!--<script src="node_modules/jquery/src/jquery.js"></script>-->
 </head>
 
 <body ng-app="app" ng-controller="RootCtrl as root">
