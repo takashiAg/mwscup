@@ -2,7 +2,9 @@ const cluster = require('cluster');
 
 let process_list = [];
 if (!cluster.isMaster) {
-    console.log('not master')
+    // This is ps monitor thread
+    console.log('monitor thread started')
+
     const {exec, execSync} = require('child_process');
     setInterval(() => {
         process_list = []
@@ -30,10 +32,13 @@ if (!cluster.isMaster) {
         console.log(process_list);
     }, 1000)
 } else {
+    //main process
+    console.log("main thread started");
+
+    //新しいスレッドを立ち上げる
     cluster.fork();
-    const electron = require('electron');
-    const app = electron.app;
-    const BrowserWindow = electron.BrowserWindow;
+
+    const {app, BrowserWindow, ipcMain} = require('electron')
     const {exec, execSync} = require('child_process');
 
     let mainWindow = null;
@@ -46,6 +51,8 @@ if (!cluster.isMaster) {
     });
 
     app.on('ready', function () {
+
+        ipcMain.on('ipc', (event, arg) => console.log(arg));
 
         // ブラウザ(Chromium)の起動, 初期画面のロード
         mainWindow = new BrowserWindow({width: 800, height: 600});
