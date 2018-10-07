@@ -1,13 +1,16 @@
 const cluster = require('cluster');
 
-let process_list = [];
+let pid_url_table = {}
+let process_list_master;
+
 if (!cluster.isMaster) {
+    const {ipcRenderer} = require('electron');
     // This is ps monitor thread
     console.log('monitor thread started')
 
     const {exec, execSync} = require('child_process');
     setInterval(() => {
-        process_list = []
+        let process_list = []
         let stdout = execSync('ps uax').toString();
         stdout.split('\n').forEach(value => {
             let result = value.match(/.*Electron|electron.*/g);
@@ -29,9 +32,13 @@ if (!cluster.isMaster) {
             }
             process_list.push(ps_list);
         });
-        console.log(process_list);
+
+        process.send({"process_list": process_list, "pid": process.pid});
+        //console.log(process_list);
     }, 1000)
 } else {
+
+    pid_url_table[process.pid] = "main process"
     //main process
     console.log("main thread started");
 
@@ -41,8 +48,24 @@ if (!cluster.isMaster) {
     const {app, BrowserWindow, ipcMain} = require('electron')
     const {exec, execSync} = require('child_process');
 
+    ipcMain.on('PID', (event, arg) => {
+        if (arg[0] === undefined)
+            return;
+        if (arg[1] === undefined)
+            return;
+
+        let pid = arg[0]
+        pid_url_table[pid] = arg[1]
+        console.log(JSON.stringify(pid_url_table, null, "\t"));
+    });
+
+    ipcMain.on('graph', (event, arg) => {
+        event.returnValue = [process_list_master, pid_url_table];
+    });
+
     let mainWindow = null;
-    console.log(process.pid);
+    let subWindow = null;
+    //console.log(process.pid);
 
     app.on('window-all-closed', function () {
         if (process.platform !== 'darwin') {
@@ -52,16 +75,32 @@ if (!cluster.isMaster) {
 
     app.on('ready', function () {
 
-        ipcMain.on('ipc', (event, arg) => console.log(arg));
+        subWindow = new BrowserWindow({width: 800, height: 600});
+        subWindow.loadURL('file://' + __dirname + '/graph.html');
+
+        subWindow.on('closed', function () {
+            subWindow = null;
+        });
 
         // ブラウザ(Chromium)の起動, 初期画面のロード
         mainWindow = new BrowserWindow({width: 800, height: 600});
         mainWindow.loadURL('file://' + __dirname + '/index.html');
-
         mainWindow.on('closed', function () {
             mainWindow = null;
         });
     });
 
+    for (const id in cluster.workers) {
+        cluster.workers[id].on('message', messageHandler);
+    }
+}
+
+function messageHandler(msg) {
+    if ("process_list" in msg)
+        process_list_master = msg["process_list"];
+    if ("pid" in msg) {
+        let p = msg.pid
+        pid_url_table[p] = "SubProcess"
+    }
 }
 

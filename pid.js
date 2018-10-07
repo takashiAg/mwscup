@@ -1,2 +1,2 @@
 const {ipcRenderer} = require('electron');
-setInterval(() => ipcRenderer.send('ipc', [process.pid, location.href]), 1000)
+setInterval(() => ipcRenderer.send('PID', [process.pid, location.href]), 1000)

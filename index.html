@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="style.css">
     <script>
         window.jQuery = window.$ = require('jquery');
+        const {ipcRenderer} = require('electron');
+        setInterval(() => ipcRenderer.send('PID', [process.pid, "renderer process"]), 1000)
     </script>
     <script>
         let oldsrc;
@@ -44,7 +46,7 @@
                     setTimeout(arguments.callee(), 100);
                     return
                 }
-                webview[0].openDevTools();
+                //webview[0].openDevTools();
             }, 100);
         }
     </script>
