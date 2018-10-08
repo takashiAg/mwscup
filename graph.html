@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>-->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>-->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <script>
+        let x_axis = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        const {ipcRenderer} = require('electron')
+        let graph_data_trans = []
+        setInterval(() => {
+            let recieved_data = [];
+            const result = ipcRenderer.sendSync('graph', 'ping');
+            let pid_url_list = result[1]
+            pid_url_list[process.pid + ''] = "graph"
+            //console.log(pid_url_list)
+            //console.log(result[0])
+            for (key in result[0]) {
+                let process_array = result[0][key];
+                let pid = process_array.pid + "";
+                let cpu_rate = process_array.cpu;
+                let name = pid;
+                if (pid in pid_url_list) {
+                    name = pid_url_list[pid]
+                }
+                recieved_data.push([pid, cpu_rate, name]);
+            }
+            graph_data_trans.push(recieved_data);
+
+            while (graph_data_trans.length > 10)
+                graph_data_trans.shift()
+            // console.log(graph_data_trans)
+            let graphdata = {}
+            for (let key in graph_data_trans) {
+                let k = key;
+                for (let key in graph_data_trans[k]) {
+                    let l = graph_data_trans[k][key]
+                    if (!(l[2] in graphdata))
+                        graphdata[l[2]] = []
+                    //console.log(graphdata)
+                    graphdata[l[2]].push(l[1])
+                }
+            }
+            //console.log(graphdata);
+            let data = [];
+            for (let key in graphdata) {
+                console.log(graphdata[key]);
+                data.push({
+                    x: x_axis,
+                    y: graphdata[key],
+                    name: key,
+                    type: 'line'
+                })
+                // data.push({
+                //     label: key,
+                //     data: graphdata[key]
+                // })
+            }
+            console.log(data)
+            Plotly.purge('stage');
+
+            Plotly.plot('stage', data, options);
+            // var ctx = document.getElementById("myChart").getContext('2d');
+            // var myChart = new Chart(ctx, {
+            //     type: 'line',
+            //     data: {
+            //         labels: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+            //         datasets: data,
+            //         borderColor: [
+            //             'rgba(255,99,132,1)',
+            //             'rgba(54, 162, 235, 1)',
+            //             'rgba(255, 206, 86, 1)',
+            //             'rgba(75, 192, 192, 1)',
+            //             'rgba(153, 102, 255, 1)',
+            //             'rgba(255, 159, 64, 1)'
+            //         ],
+            //     },
+            //     options: opt
+            // });
+
+        }, 1000)
+        // let opt = {
+        //     responsive: true,
+        //     maintainAspectRatio: false,
+        //     responsiveAnimationDuration: 0
+        // }
+        var options = {
+            title: 'サンプルチャート'
+        };
+        window.onload = () => {
+        }
+    </script>
+</head>
+<body>
+<div id="stage"></div>
+<canvas id="myChart" width="400" height="400"></canvas>
+</body>
+</html>
