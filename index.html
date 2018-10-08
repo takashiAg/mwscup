@@ -27,12 +27,35 @@
             }, 100);
         }
 
+        function keydown() {
+            if (window.event.keyCode == 13) {
+                var url = document.getElementById("url").value;
+                if (isURL(url)) {
+                    load();
+                } else {
+                    document.getElementById("url").value = "https://google.com/search?q=" + url.replace(" ", "+");
+                    load();
+                }
+            }
+        }
+
+        function isURL(str) {
+            var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+                '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|' + // domain name
+                '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+                '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+                '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+                '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
+            return pattern.test(str);
+        }
+
         function load() {
             var webview_wrapper = document.getElementById("webview_wrapper");
             webview_wrapper.removeChild(webview_wrapper.lastChild);
-            
+
             // get url
             var url = document.getElementById("url").value;
+            console.log()
 
             // create_new_webview_instanse
             var newWebview = document.createElement("webview");
@@ -50,33 +73,36 @@
             }, 100);
         }
 
-     // crawl webpage
-     function crawl(){
-         $.getJSON('./crawl.conf/target.json') //load target
-          .done(function(json){ // success
-              crawLoop(json.urlist.length,0,json.urlist);
-          })
-          .fail(function(){ // faild
-              console.log('error');
-          })
-     }
+        // crawl webpage
+        function crawl() {
+            $.getJSON('./crawl.conf/target.json') //load target
+                .done(function (json) { // success
+                    crawLoop(json.urlist.length, 0, json.urlist);
+                })
+                .fail(function () { // faild
+                    console.log('error');
+                })
+        }
 
-     // sleep function
-     function crawLoop(maxCount, i, urlist) {
-         if (i < maxCount) {
-             document.querySelector("div#menu-bar input#url").value = urlist[i];
-             load();
-             setTimeout(function(){crawLoop(maxCount, ++i, urlist)}, 10000);
-         }
-     }
-     
+        // sleep function
+        function crawLoop(maxCount, i, urlist) {
+            if (i < maxCount) {
+                document.querySelector("div#menu-bar input#url").value = urlist[i];
+                load();
+                setTimeout(function () {
+                    crawLoop(maxCount, ++i, urlist)
+                }, 10000);
+            }
+        }
+
     </script>
     <!--<script src="node_modules/jquery/src/jquery.js"></script>-->
 </head>
 
 <body ng-app="app" ng-controller="RootCtrl as root">
 <div id="menu-bar">
-    <input type="text" id="url" value="http://google.com" onChange="load(this)"></input>
+    <input type="text" id="url" value="http://google.com" onkeydown="keydown()"></input>
+    <!--<input type="text" id="url" value="http://google.com" onChange="load(this)"></input>-->
     <button onclick="load();">reload</button>
     <button onclick="crawl();">crawl</button>
 </div>
