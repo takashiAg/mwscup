@@ -11,7 +11,7 @@ if (!cluster.isMaster) {
     const {exec, execSync} = require('child_process');
     setInterval(() => {
         let process_list = []
-        let stdout = execSync('ps uax').toString();
+        let stdout = execSync('ps uaxc').toString();
         stdout.split('\n').forEach(value => {
             let result = value.match(/.*Electron|electron.*/g);
             if (result == null)
