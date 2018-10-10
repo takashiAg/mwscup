@@ -2,6 +2,7 @@ const cluster = require('cluster');
 
 let pid_url_table = {}
 let process_list_master;
+let backstatus = 100;
 
 if (!cluster.isMaster) {
     const {ipcRenderer} = require('electron');
@@ -61,6 +62,16 @@ if (!cluster.isMaster) {
 
     ipcMain.on('graph', (event, arg) => {
         event.returnValue = [process_list_master, pid_url_table];
+    });
+    ipcMain.on('back', (event, arg) => {
+        if (arg == "status") {
+            event.sender.send("reply", backstatus + 0);
+            backstatus = 100;
+        } else if (arg == "back") {
+            backstatus = 99;
+        } else if (arg == "go") {
+            backstatus = 101;
+        }
     });
 
     let mainWindow = null;

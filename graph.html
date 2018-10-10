@@ -2,12 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>ブラウザのcpu使用率グラフ</title>
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>-->
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>-->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
     <script>
+        const notifier = require('node-notifier');
+        const path = require('path');
+
+        function notify(title, message) {
+            notifier.notify({
+                title: title,
+                message: message,
+                icon: path.join(__dirname, 'icon', 'logo.png'),
+                sound: true,
+                wait: true
+            }, function (err, response) {
+                if (err)
+                    console.error(err);
+            });
+
+            notifier.on('click', function (notifierObject, options) {
+            });
+
+            notifier.on('timeout', function (notifierObject, options) {
+            });
+        }
+
         let x_axis = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
         const {ipcRenderer} = require('electron')
         let graph_data_trans = []
@@ -25,8 +47,11 @@
                 let name = pid;
                 if (pid in pid_url_list) {
                     name = pid_url_list[pid]
+                    if (name.startsWith("http")) {
+                        recieved_data.push([pid, cpu_rate, name]);
+                    }
                 }
-                recieved_data.push([pid, cpu_rate, name]);
+                //recieved_data.push([pid, cpu_rate, name]);
             }
             graph_data_trans.push(recieved_data);
 
@@ -48,6 +73,14 @@
             let data = [];
             for (let key in graphdata) {
                 console.log(graphdata[key]);
+                let count_of_cpu_over = 0;
+                for (let key2 in graphdata[key]) {
+                    let threshold = 90;
+                    if (graphdata[key][key2] > threshold)
+                        count_of_cpu_over++;
+                }
+                if (count_of_cpu_over > 5)
+                    notify("CPU使用率警告", "CPUの使用率が高いページを閲覧しています")
                 data.push({
                     x: x_axis,
                     y: graphdata[key],
@@ -88,7 +121,7 @@
         //     responsiveAnimationDuration: 0
         // }
         var options = {
-            title: 'サンプルチャート'
+            title: 'ブラウザのcpu使用率グラフ'
         };
         window.onload = () => {
         }

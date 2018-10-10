@@ -30,13 +30,24 @@
         function keydown() {
             if (window.event.keyCode == 13) {
                 var url = document.getElementById("url").value;
-                if (isURL(url)) {
+                if (isURL(url)&&url.startsWith('http')) {
                     load();
                 } else {
                     document.getElementById("url").value = "https://google.com/search?q=" + url.replace(" ", "+");
                     load();
                 }
             }
+        }
+
+
+        function back() {
+            const {ipcRenderer} = require('electron');
+            let result = ipcRenderer.send('back', 'back');
+        }
+
+        function go() {
+            const {ipcRenderer} = require('electron');
+            let result = ipcRenderer.send('back', 'go');
         }
 
         function isURL(str) {
@@ -101,6 +112,8 @@
 
 <body ng-app="app" ng-controller="RootCtrl as root">
 <div id="menu-bar">
+    <button onclick="back();">back</button>
+    <button onclick="go();">go</button>
     <input type="text" id="url" value="http://google.com" onkeydown="keydown()"></input>
     <!--<input type="text" id="url" value="http://google.com" onChange="load(this)"></input>-->
     <button onclick="load();">reload</button>
