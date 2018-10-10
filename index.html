@@ -39,6 +39,17 @@
             }
         }
 
+
+        function back() {
+            const {ipcRenderer} = require('electron');
+            let result = ipcRenderer.send('back', 'back');
+        }
+
+        function go() {
+            const {ipcRenderer} = require('electron');
+            let result = ipcRenderer.send('back', 'go');
+        }
+
         function isURL(str) {
             var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
                 '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|' + // domain name
@@ -101,6 +112,8 @@
 
 <body ng-app="app" ng-controller="RootCtrl as root">
 <div id="menu-bar">
+    <button onclick="back();">back</button>
+    <button onclick="go();">go</button>
     <input type="text" id="url" value="http://google.com" onkeydown="keydown()"></input>
     <!--<input type="text" id="url" value="http://google.com" onChange="load(this)"></input>-->
     <button onclick="load();">reload</button>
