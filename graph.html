@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>ブラウザのcpu使用率グラフ</title>
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>-->
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>-->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -25,8 +25,11 @@
                 let name = pid;
                 if (pid in pid_url_list) {
                     name = pid_url_list[pid]
+                    if (name.startsWith("http")) {
+                        recieved_data.push([pid, cpu_rate, name]);
+                    }
                 }
-                recieved_data.push([pid, cpu_rate, name]);
+                //recieved_data.push([pid, cpu_rate, name]);
             }
             graph_data_trans.push(recieved_data);
 
@@ -88,7 +91,7 @@
         //     responsiveAnimationDuration: 0
         // }
         var options = {
-            title: 'サンプルチャート'
+            title: 'ブラウザのcpu使用率グラフ'
         };
         window.onload = () => {
         }
