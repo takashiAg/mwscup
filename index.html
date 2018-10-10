@@ -30,7 +30,7 @@
         function keydown() {
             if (window.event.keyCode == 13) {
                 var url = document.getElementById("url").value;
-                if (isURL(url)) {
+                if (isURL(url)&&url.startsWith('http')) {
                     load();
                 } else {
                     document.getElementById("url").value = "https://google.com/search?q=" + url.replace(" ", "+");
