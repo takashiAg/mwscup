@@ -29,8 +29,12 @@
             notifier.on('timeout', function (notifierObject, options) {
             });
         }
+        plot = 60;
+        var x_axis = new Array(plot);
+        for (var i = 0; i < plot; i++) {
+          x_axis[i] = i;
+        }
 
-        let x_axis = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
         const {ipcRenderer} = require('electron')
         let graph_data_trans = []
         setInterval(() => {
@@ -55,7 +59,7 @@
             }
             graph_data_trans.push(recieved_data);
 
-            while (graph_data_trans.length > 10)
+            while (graph_data_trans.length > plot)
                 graph_data_trans.shift()
             // console.log(graph_data_trans)
             let graphdata = {}
